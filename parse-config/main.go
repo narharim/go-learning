@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log"
 
-	"example.com/parse-config/config"
+	"github.com/narharim/go-learning/parse-config/config"
 )
 
 // Read from file config.json (config.ReadConfig(filePath))
