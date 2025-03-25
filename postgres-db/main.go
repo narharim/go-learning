@@ -7,11 +7,13 @@ import (
 	"os/signal"
 	"syscall"
 
+	_ "github.com/joho/godotenv/autoload"
 	"github.com/narharim/go-learning/postgres-db/database"
 	"github.com/narharim/go-learning/postgres-db/server"
 )
 
 func main() {
+
 	dbcfg := database.NewConfig()
 	if err := dbcfg.Validate(); err != nil {
 		log.Fatalf("Invalid configuration: %v", err)

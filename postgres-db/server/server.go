@@ -13,12 +13,12 @@ type config struct {
 	port string
 }
 
-type Server struct {
+type server struct {
 	Config *config
 }
 
-func New(cfg *config) *Server {
-	return &Server{cfg}
+func New(cfg *config) *server {
+	return &server{cfg}
 }
 
 func NewConfig() *config {
@@ -27,7 +27,7 @@ func NewConfig() *config {
 	}
 }
 
-func (s *Server) Start() error {
+func (s *server) Start() error {
 	server := &http.Server{
 		Addr:         fmt.Sprintf(":%s", s.Config.port),
 		Handler:      s.RegisterRoutes(),
@@ -40,7 +40,7 @@ func (s *Server) Start() error {
 	return server.ListenAndServe()
 }
 
-func (s *Server) Shutdown(ctx context.Context) error {
+func (s *server) Shutdown(ctx context.Context) error {
 	if s != nil {
 		return s.Shutdown(ctx)
 	}

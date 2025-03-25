@@ -1,12 +1,4 @@
--- schema/schema.sql
-
-CREATE TABLE authors (
-  id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
-  bio TEXT,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-
+-- +goose Up
 CREATE TABLE books (
   id SERIAL PRIMARY KEY,
   author_id INTEGER NOT NULL REFERENCES authors(id),
@@ -18,3 +10,6 @@ CREATE TABLE books (
 );
 
 CREATE INDEX books_author_id_idx ON books(author_id);
+
+-- +goose Down
+DROP TABLE books;
