@@ -3,13 +3,16 @@ package database
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"os"
 
 	_ "github.com/lib/pq"
 )
 
-type dbconfig struct {
+type DB struct {
+	*sql.DB
+}
+
+type DBConfig struct {
 	host     string
 	port     string
 	dbname   string
@@ -17,8 +20,8 @@ type dbconfig struct {
 	password string
 }
 
-func NewConfig() *dbconfig {
-	return &dbconfig{
+func NewConfig() *DBConfig {
+	return &DBConfig{
 		host:     os.Getenv("DB_HOST"),
 		port:     os.Getenv("DB_PORT"),
 		dbname:   os.Getenv("DB_DATABASE"),
@@ -27,7 +30,29 @@ func NewConfig() *dbconfig {
 	}
 }
 
-func (c *dbconfig) Validate() error {
+func NewDB(cfg *DBConfig) (*DB, error) {
+	dbSource := fmt.Sprintf(
+		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
+		cfg.username,
+		cfg.password,
+		cfg.host,
+		cfg.port,
+		cfg.dbname,
+	)
+
+	db, err := sql.Open("postgres", dbSource)
+	if err != nil {
+		return nil, fmt.Errorf("error opening database: %w", err)
+	}
+
+	if err := db.Ping(); err != nil {
+		return nil, fmt.Errorf("error connecting to database: %w", err)
+	}
+
+	return &DB{db}, nil
+}
+
+func (c *DBConfig) Validate() error {
 	if c.host == "" {
 		return fmt.Errorf("database host is required")
 	}
@@ -44,27 +69,4 @@ func (c *dbconfig) Validate() error {
 		return fmt.Errorf("database password is required")
 	}
 	return nil
-}
-
-func NewDB(cfg *dbconfig) (*sql.DB, error) {
-	dbSource := fmt.Sprintf(
-		"postgres://%s:%s@%s:%s/%s?sslmode=disable",
-		cfg.username,
-		cfg.password,
-		cfg.host,
-		cfg.port,
-		cfg.dbname,
-	)
-	log.Println(dbSource)
-
-	db, err := sql.Open("postgres", dbSource)
-	if err != nil {
-		return nil, fmt.Errorf("error opening database: %w", err)
-	}
-
-	if err := db.Ping(); err != nil {
-		return nil, fmt.Errorf("error connecting to database: %w", err)
-	}
-
-	return db, nil
 }

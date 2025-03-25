@@ -1,52 +1,23 @@
 package main
 
 import (
-	"context"
 	"log"
 	"os"
-	"os/signal"
-	"syscall"
 
 	_ "github.com/joho/godotenv/autoload"
-	"github.com/narharim/go-learning/postgres-db/database"
-	"github.com/narharim/go-learning/postgres-db/server"
+	"github.com/narharim/go-learning/postgres-db/internal/app"
 )
 
 func main() {
-
-	dbcfg := database.NewConfig()
-	if err := dbcfg.Validate(); err != nil {
-		log.Fatalf("Invalid configuration: %v", err)
-	}
-
-	db, err := database.NewDB(dbcfg)
+	app, err := app.NewApp()
 	if err != nil {
-		log.Fatalf("Failed to connect to database: %v", err)
-	}
-	defer db.Close()
-
-	srvcfg := server.NewConfig()
-
-	srv := server.New(srvcfg)
-
-	//New to make this using context
-	shutdown := make(chan os.Signal, 1)
-	signal.Notify(shutdown, os.Interrupt, syscall.SIGTERM)
-
-	go func() {
-		if err := srv.Start(); err != nil {
-			log.Printf("Server error: %v", err)
-		}
-	}()
-
-	log.Println("Server started successfully")
-
-	<-shutdown
-	log.Println("Shutting down server...")
-
-	if err := srv.Shutdown(context.Background()); err != nil {
-		log.Printf("Error during server shutdown: %v", err)
+		log.Fatalf("unable to initialize application %v", err)
+		os.Exit(1)
 	}
 
-	log.Println("Server shutdown complete")
+	if err := app.Start(); err != nil {
+		log.Fatalf("unable to start application %v", err)
+		os.Exit(1)
+	}
+
 }
