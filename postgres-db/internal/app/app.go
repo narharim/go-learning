@@ -34,7 +34,6 @@ func NewApp() (*App, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to database: %v", err)
 	}
-	defer db.Close()
 
 	dbQueries := database.New(db)
 	app := &App{

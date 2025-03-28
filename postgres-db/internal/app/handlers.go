@@ -63,9 +63,35 @@ func (a *App) createAuthorHandler(w http.ResponseWriter, r *http.Request) {
 		writeJSONResponse(w, http.StatusInternalServerError, errors.New("err-failed-to-create-author"))
 		return
 	}
-	writeJSONResponse(w, http.StatusCreated, "")
+	tx.Commit()
+	w.WriteHeader(http.StatusCreated)
 }
 
 func (a *App) listAuthorsHandler(w http.ResponseWriter, r *http.Request) {
-	_, _ = w.Write([]byte("Thank you for checking up on me :)"))
+	tx, err := a.db.BeginTx(r.Context(), nil)
+	if err != nil {
+		log.Println(err)
+		writeJSONResponse(w, http.StatusInternalServerError, errors.New(http.StatusText(http.StatusInternalServerError)))
+		return
+	}
+
+	q := a.dbQueries.WithTx(tx)
+
+	defer func() {
+		if p := recover(); p != nil {
+			// If there's a panic, rollback the transaction
+			tx.Rollback() //TODO: Need to check this
+		} else if err != nil {
+			tx.Rollback() // Rollback transaction on error
+		}
+	}()
+
+	authors, err := q.ListAuthors(r.Context())
+	if err != nil {
+		log.Println(err)
+		writeJSONResponse(w, http.StatusInternalServerError, errors.New("err-failed-to-get-author"))
+		return
+	}
+	tx.Commit()
+	writeJSONResponse(w, http.StatusOK, authors)
 }
