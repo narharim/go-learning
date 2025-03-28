@@ -7,26 +7,26 @@ import (
 )
 
 type Response struct {
-	Data  interface{} `json:"data,omitempty"`
-	Error string      `json:"error,omitempty"`
+	Data  any    `json:"data,omitempty"`
+	Error string `json:"error,omitempty"`
 }
 
-func WriteJSONResponse(w http.ResponseWriter, statusCode int, data interface{}) {
+func writeJSONResponse(w http.ResponseWriter, statusCode int, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 
-	resp := Response{Data: data}
+	response := Response{}
 
-	if errMsg != "" {
-		resp.Error = errMsg
+	//Following structure {"data":"DATA"} if success and if error simple {"error": "err-actual-error-unique-error"} \
+	//all error must start from "err-" it will distinguish error from defined or internal package
+
+	if err, ok := data.(error); ok {
+		response.Error = err.Error()
+	} else {
+		response.Data = data
 	}
-	if err := json.NewEncoder(w).Encode(data); err != nil {
+
+	if err := json.NewEncoder(w).Encode(response); err != nil {
 		log.Printf("failed to write JSON response %v", err)
 	}
-}
-
-func HandleAppError(w http.ResponseWriter, err error) {
-	WriteJSONResponse(w, http.StatusInternalServerError, &Response{
-		Error: err.Error(),}
-	)
 }

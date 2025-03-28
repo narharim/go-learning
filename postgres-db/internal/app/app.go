@@ -23,6 +23,7 @@ type App struct {
 	config     *Config
 	httpServer *http.Server
 	db         *database.DB
+	dbQueries  *database.Queries
 }
 
 func NewApp() (*App, error) {
@@ -35,9 +36,11 @@ func NewApp() (*App, error) {
 	}
 	defer db.Close()
 
+	dbQueries := database.New(db)
 	app := &App{
-		config: cfg,
-		db:     db,
+		config:    cfg,
+		db:        db,
+		dbQueries: dbQueries,
 	}
 
 	app.httpServer = &http.Server{
