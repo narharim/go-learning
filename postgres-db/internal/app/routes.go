@@ -26,7 +26,7 @@ func (a *App) RegisterRoutes() http.Handler {
 	r.HandleFunc("/authors", a.listAuthorsHandler).Methods("GET")
 	r.HandleFunc("/authors", a.createAuthorHandler).Methods("POST")
 
-	r.HandleFunc("/authors/{id}", a.Ping).Methods("GET")
+	r.HandleFunc("/authors/{id}", a.getAuthorHandler).Methods("GET")
 	r.HandleFunc("/authors/{id}", a.Ping).Methods("PUT")
 	r.HandleFunc("/authors/{id}", a.Ping).Methods("DELETE")
 
