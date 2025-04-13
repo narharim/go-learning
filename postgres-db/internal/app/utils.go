@@ -12,6 +12,12 @@ type Response struct {
 }
 
 func writeJSONResponse(w http.ResponseWriter, statusCode int, data any) {
+
+	if statusCode == http.StatusNoContent {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 
